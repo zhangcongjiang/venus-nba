@@ -1,0 +1,214 @@
+-- public.player_regular_game definition
+
+-- Drop table
+
+-- DROP TABLE public.player_regular_game;
+
+CREATE TABLE public.player_regular_season (
+	id bigserial NOT NULL,
+	player_name varchar(32) NOT NULL,
+	season varchar(16) NULL,
+	team varchar(4) NULL,
+	game_attend int2 NULL,
+	game_start int2 NULL,
+	minutes_average NUMERIC(8, 1) NULL,
+	pts NUMERIC(8, 1) NULL,
+	reb NUMERIC(8, 1) NULL,
+	oreb NUMERIC(8, 1) NULL,
+	dreb NUMERIC(8, 1) NULL,
+	ast NUMERIC(8, 1) NULL,
+	fga NUMERIC(8, 1) NULL,
+	fg NUMERIC(8, 1) NULL,
+	fg3a NUMERIC(8, 1) NULL,
+	fg3 NUMERIC(8, 1) NULL,
+	fta NUMERIC(8, 1) NULL,
+	ft NUMERIC(8, 1) NULL,
+	stl NUMERIC(8, 1) NULL,
+	blk NUMERIC(8, 1) NULL,
+	tov NUMERIC(8, 1) NULL,
+	CONSTRAINT player_regular_season_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.player_regular_total_season (
+	id bigserial NOT NULL,
+	player_name varchar(32) NOT NULL,
+	season varchar(16) NULL,
+	team varchar(4) NULL,
+	game_attend int2 NULL,
+	game_start int2 NULL,
+	minutes_attend int2 NULL,
+	pts int2 NULL,
+	reb int2 NULL,
+	oreb int2 NULL,
+	dreb int2 NULL,
+	ast int2 NULL,
+	fga int2 NULL,
+	fg int2 NULL,
+	fg3a int2 NULL,
+	fg3 int2 NULL,
+	fta int2 NULL,
+	ft int2 NULL,
+	stl int2 NULL,
+	blk int2 NULL,
+	tov int2 NULL,
+	triple int2 NULL,
+	salary int4 NULL,
+	href varchar(64) NULL,
+	CONSTRAINT player_regular_total_season_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.player_playoffs_season (
+	id bigserial NOT NULL,
+	player_name varchar(32) NOT NULL,
+	season varchar(16) NULL,
+	team varchar(4) NULL,
+	game_attend int2 NULL,
+	game_start int2 NULL,
+	minutes_average NUMERIC(8, 1) NULL,
+	pts NUMERIC(8, 1) NULL,
+	reb NUMERIC(8, 1) NULL,
+	oreb NUMERIC(8, 1) NULL,
+	dreb NUMERIC(8, 1) NULL,
+	ast NUMERIC(8, 1) NULL,
+	fga NUMERIC(8, 1) NULL,
+	fg NUMERIC(8, 1) NULL,
+	fg3a NUMERIC(8, 1) NULL,
+	fg3 NUMERIC(8, 1) NULL,
+	fta NUMERIC(8, 1) NULL,
+	ft NUMERIC(8, 1) NULL,
+	stl NUMERIC(8, 1) NULL,
+	blk NUMERIC(8, 1) NULL,
+	tov NUMERIC(8, 1) NULL,
+	CONSTRAINT player_playoffs_season_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.player_playoffs_total_season (
+	id bigserial NOT NULL,
+	player_name varchar(32) NOT NULL,
+	season varchar(16) NULL,
+	team varchar(4) NULL,
+	game_attend int2 NULL,
+	game_start int2 NULL,
+	minutes_attend int2 NULL,
+	pts int2 NULL,
+	reb int2 NULL,
+	oreb int2 NULL,
+	dreb int2 NULL,
+	ast int2 NULL,
+	fga int2 NULL,
+	fg int2 NULL,
+	fg3a int2 NULL,
+	fg3 int2 NULL,
+	fta int2 NULL,
+	ft int2 NULL,
+	stl int2 NULL,
+	blk int2 NULL,
+	tov int2 NULL,
+	CONSTRAINT player_playoffs_total_season_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.player_draft (
+	id bigserial NOT NULL,
+	player_name varchar(64) NOT NULL,
+	draft_year int2 NULL,
+	draft_position int2 Null,
+	team varchar(4) NULL,
+	href varchar(128) NULL,
+	attend bool DEFAULT FALSE,
+	CONSTRAINT player_player_draft_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.player_regular_gamelog (
+	id bigserial NOT NULL,
+	player_name varchar(32) NOT NULL,
+	season int2 NULL,
+	game_date date NULL,
+	up bool NULL,
+	playing_time interval NULL,
+	pts int2 NULL,
+	reb int2 NULL,
+	oreb int2 NULL,
+	dreb int2 NULL,
+	ast int2 NULL,
+	fga int2 NULL,
+	fg int2 NULL,
+	fg3a int2 NULL,
+	fg3 int2 NULL,
+	fta int2 NULL,
+	ft int2 NULL,
+	stl int2 NULL,
+	blk int2 NULL,
+	tov int2 NULL,
+	plus_minus int2 NULL,
+	team varchar(4) NULL,
+	opp varchar(4) NULL,
+	game_win bool NULL,
+	CONSTRAINT player_regular_gamelog_pkey PRIMARY KEY (id)
+);
+
+CREATE TABLE public.player_playoffs_gamelog (
+	id bigserial NOT NULL,
+	player_name varchar(32) NOT NULL,
+	season int2 NULL,
+	game_date date NULL,
+	up bool NULL,
+	playing_time interval NULL,
+	pts int2 NULL,
+	reb int2 NULL,
+	oreb int2 NULL,
+	dreb int2 NULL,
+	ast int2 NULL,
+	fga int2 NULL,
+	fg int2 NULL,
+	fg3a int2 NULL,
+	fg3 int2 NULL,
+	fta int2 NULL,
+	ft int2 NULL,
+	stl int2 NULL,
+	blk int2 NULL,
+	tov int2 NULL,
+	plus_minus int2 NULL,
+	team varchar(4) NULL,
+	opp varchar(4) NULL,
+	game_win bool NULL,
+	CONSTRAINT player_playoffs_game_pkey PRIMARY KEY (id)
+);
+
+-- 查询运动员每个赛季最佳数据表现
+WITH player_season_totals AS (
+    SELECT
+        *,
+        RANK() OVER (PARTITION BY player_name, season ORDER BY pts + reb + ast + stl + blk DESC) AS rnk
+    FROM
+        public.player_regular_gamelog where player_name='James Harden'
+)
+SELECT
+    *
+FROM
+    player_season_totals
+WHERE
+    rnk = 1;
+
+
+CREATE TABLE public.player_active (
+	id bigserial NOT NULL,
+	player_id varchar(8) NOT NULL,
+	code varchar(128) NULL,
+	player_name varchar(64) NOT NULL,
+    chinese_name varchar(128) NULL,
+	draft_year int2 NULL,
+	draft_position int2 Null,
+	team varchar(16) NULL,
+    team_en varchar(16) NULL,
+	height varchar(8) NULL,
+	body_weight varchar(16) NULL,
+	position varchar(16) NULL,
+	CONSTRAINT player_player_active_pkey PRIMARY KEY (id)
+);
+
+update public.player_active
+set href=public.player_draft.href from public.player_draft where public.player_active.player_name = public.player_draft.player_name;
+
+UPDATE public.player_draft
+SET player_name = REPLACE(player_name, 'Š', 'S')
+WHERE player_name LIKE '%Š%';
