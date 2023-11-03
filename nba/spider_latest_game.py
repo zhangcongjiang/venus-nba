@@ -14,6 +14,8 @@ from email.mime.multipart import MIMEMultipart
 
 from bs4 import BeautifulSoup
 
+from nba.image_utils import ImageUtils
+
 old_rockets = [
     {
         'player_name': 'tyty_washington',
@@ -1016,7 +1018,7 @@ def get_comments():
         'sec-fetch-site': 'same-site',
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
     }
-    for number in [370, 371, 372, 373, 374, 375, 376, 377, 378, 469, 468, 470, 471]:
+    for number in [475, 381, 379, 380]:
         data = {
             "relation": "CHILD",
             "pageInfo": {"page": 1, "pageSize": 50},
@@ -1088,26 +1090,23 @@ def get_player_stats(player):
                     player_datas['result'] = f"{team} **{scores}** {opp}"
                     seconds = str(stat.get('secs')).zfill(2)
                     player_datas['time'] = f"上场时间：{min}:{seconds}"
-
                     pts = stat.get('points')
                     player_datas[
                         'name'] = f"{profile.get('teamProfile', {}).get('displayAbbr')}**{player.get('draft_position')}{player.get('name')}**"
-                    player_datas['data'] = f"{pts}分"
                     rebs = int(stat.get('rebs'))
-                    if rebs:
-                        player_datas['data'] = player_datas['data'] + f" | {rebs}篮板"
                     asts = int(stat.get('assists'))
-                    if asts:
-                        player_datas['data'] = player_datas['data'] + f" | {asts}助攻"
                     blks = int(stat.get('blocks'))
-                    if blks:
-                        player_datas['data'] = player_datas['data'] + f" | {blks}盖帽"
                     stls = int(stat.get('steals'))
-                    if stls:
-                        player_datas['data'] = player_datas['data'] + f" | {stls}抢断"
                     tov = int(stat.get('turnovers'))
+                    player_datas['data'] = {
+                        '得分：': pts,
+                        '篮板：': rebs,
+                        '助攻：': asts,
+                        '抢断：': stls,
+                        '盖帽：': blks,
+                        '失误：': tov
+                    }
 
-                    player_datas['data'] = player_datas['data'] + f" | {tov}失误"
                     eff = int(stat.get('efficiency'))
                     player_datas['eff'] = eff
                     player_datas['chinese_name'] = player.get('name')
@@ -1191,9 +1190,9 @@ if __name__ == '__main__':
         except Exception:
             print(f"err,{player.get('draft_position')}")
 
-    sorted_rookies_2023 = sorted(stats_rookies_2023, key=lambda x: x['eff'])
+    sorted_rookies_2023 = sorted(stats_rookies_2023, key=lambda x: x['eff'], reverse=True)
     print(sorted_rookies_2023)
-
+    tag = 'rookie_2023'
     file_name = os.path.join(file_path, f"{today}_rookie_2023.md")
     with open(file_name, "w", encoding="utf-8") as file:
         file.write(
@@ -1202,15 +1201,20 @@ if __name__ == '__main__':
         i = 1
         for player_data in sorted_rookies_2023:
             if i == 1:
-                file.write(f"#### {i}. **今日卧底**：{player_data.get('name')}\n")
-            elif i == len(sorted_rookies_2023):
                 file.write(f"#### {i}. **今日之星**：{player_data.get('name')}\n")
+            elif i == len(sorted_rookies_2023):
+                file.write(f"#### {i}. **今日卧底**：{player_data.get('name')}\n")
             else:
                 file.write(f"#### {i}. {player_data.get('name')}\n")
+
             file.write(
-                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\image\\{player_data.get('player_name')}.png)\n\n")
+                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{player_data.get('player_name')}_{tag}.png)\n\n")
+            pd_str = ImageUtils().format_draw_data(player_data.get('player_name'), tag, player_data.get('hit_rate'),
+                                                   player_data.get('data'))
+
             file.write(f"{player_data.get('time')}\n\n")
-            file.write(f"数据：**{player_data.get('data')}**\n\n")
+
+            file.write(f"数据：**{pd_str}**\n\n")
             file.write(f"{player_data.get('hit_rate')}\n\n")
             file.write(f"{player_data.get('result')}\n\n")
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
@@ -1227,10 +1231,10 @@ if __name__ == '__main__':
         except Exception:
             print(f"err,{player.get('draft_position')}")
 
-    sorted_rookies_2022 = sorted(stats_rookies_2022, key=lambda x: x['eff'])
+    sorted_rookies_2022 = sorted(stats_rookies_2022, key=lambda x: x['eff'], reverse=True)
     print(sorted_rookies_2022)
     today = datetime.now().strftime("%Y-%m-%d")
-
+    tag = 'rookie_2022'
     file_name = os.path.join(file_path, f"{today}_rookie_2022.md")
     with open(file_name, "w", encoding="utf-8") as file:
         file.write(
@@ -1239,16 +1243,19 @@ if __name__ == '__main__':
         i = 1
         for player_data in sorted_rookies_2022:
             if i == 1:
-                file.write(f"#### {i}. **今日卧底**：{player_data.get('name')}\n")
-            elif i == len(sorted_rookies_2022):
                 file.write(f"#### {i}. **今日之星**：{player_data.get('name')}\n")
+            elif i == len(sorted_rookies_2022):
+                file.write(f"#### {i}. **今日卧底**：{player_data.get('name')}\n")
             else:
                 file.write(f"#### {i}. {player_data.get('name')}\n")
+
             file.write(
-                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\image\\{player_data.get('player_name')}.png)\n\n")
+                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{player_data.get('player_name')}_{tag}.png)\n\n")
+            pd_str = ImageUtils().format_draw_data(player_data.get('player_name'), tag, player_data.get('hit_rate'),
+                                                   player_data.get('data'))
 
             file.write(f"{player_data.get('time')}\n\n")
-            file.write(f"数据：**{player_data.get('data')}**\n\n")
+            file.write(f"数据：**{pd_str}**\n\n")
             file.write(f"{player_data.get('hit_rate')}\n\n")
             file.write(f"{player_data.get('result')}\n\n")
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
@@ -1265,6 +1272,7 @@ if __name__ == '__main__':
             print(f"err,{player.get('draft_position')}")
             print(traceback.format_exc())
     print(stats_old_rockets)
+    tag = 'old_rockets'
     file_name = os.path.join(file_path, f"{today}_old_rockets.md")
     with open(file_name, "w", encoding="utf-8") as file:
         file.write(
@@ -1274,46 +1282,13 @@ if __name__ == '__main__':
         for player_data in stats_old_rockets:
             file.write(f"#### {i}. {player_data.get('chinese_name')}\n")
             file.write(
-                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\image\\{player_data.get('player_name')}.png)\n\n")
+                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{player_data.get('player_name')}_{tag}.png)\n\n")
+            pd_str = ImageUtils().format_draw_data(player_data.get('player_name'), tag, player_data.get('hit_rate'),
+                                                   player_data.get('data'))
 
             file.write(f"{player_data.get('time')}\n\n")
-            file.write(f"数据：**{player_data.get('data')}**\n\n")
+            file.write(f"数据：**{pd_str}**\n\n")
             file.write(f"{player_data.get('hit_rate')}\n\n")
-            file.write(f"{player_data.get('result')}\n\n")
-            file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
-            file.write(f"热评：{hot_comments.get(player_data.get('chinese_name'))}\n\n\n")
-            file.write("---\n\n")
-            i += 1
-
-    for player in big_contract:
-        try:
-            stat_contract = get_player_stats(player)
-            if stat_contract:
-                stats_big_contracts.append(stat_contract)
-        except Exception as e:
-            print(f"err,{player.get('draft_position')}")
-            print(traceback.format_exc())
-    sorted_contracts = sorted(stats_big_contracts, key=lambda x: x['eff'])
-    print(sorted_contracts)
-    file_name = os.path.join(file_path, f"{today}_big_contract.md")
-    with open(file_name, "w", encoding="utf-8") as file:
-        i = 1
-
-        for player_data in sorted_contracts:
-            if i == 1:
-                file.write(f"#### {i}. **今日卧底**：{player_data.get('chinese_name')}\n")
-            elif i == len(sorted_contracts):
-                file.write(f"#### {i}. **今日之星**：{player_data.get('chinese_name')}\n")
-            else:
-                file.write(f"#### {i}. {player_data.get('chinese_name')}\n")
-
-            file.write(
-                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\image\\{player_data.get('player_name')}.png)\n\n")
-
-            file.write(f"{player_data.get('time')}\n\n")
-            file.write(f"数据：**{player_data.get('data')}**\n\n")
-            file.write(f"{player_data.get('hit_rate')}\n\n")
-            file.write(f"合同：{player_data.get('contract')}\n\n")
             file.write(f"{player_data.get('result')}\n\n")
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
             file.write(f"热评：{hot_comments.get(player_data.get('chinese_name'))}\n\n\n")
@@ -1330,6 +1305,7 @@ if __name__ == '__main__':
             print(traceback.format_exc())
     sorted_stars = sorted(stats_big_stars, key=lambda x: x['eff'])
     print(sorted_stars)
+    tag = 'young_stars'
     file_name = os.path.join(file_path, f"{today}_young_stars.md")
     with open(file_name, "w", encoding="utf-8") as file:
         i = 1
@@ -1340,11 +1316,13 @@ if __name__ == '__main__':
                 file.write(f"#### {i}. {player_data.get('chinese_name')}\n")
 
             file.write(
-                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\image\\{player_data.get('player_name')}.png)\n\n")
+                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{player_data.get('player_name')}_{tag}.png)\n\n")
+            pd_str = ImageUtils().format_draw_data(player_data.get('player_name'), tag, player_data.get('hit_rate'),
+                                                   player_data.get('data'))
 
             file.write(f"选秀：{player_data.get('team')}-**{player_data.get('draft_position')}**\n\n")
             file.write(f"{player_data.get('time')}\n\n")
-            file.write(f"数据：**{player_data.get('data')}**\n\n")
+            file.write(f"数据：**{pd_str}**\n\n")
             file.write(f"{player_data.get('hit_rate')}\n\n")
 
             file.write(f"比赛结果：{player_data.get('result')}\n\n")
@@ -1364,6 +1342,7 @@ if __name__ == '__main__':
             print(traceback.format_exc())
     sorted_guards = sorted(stats_young_guards, key=lambda x: x['eff'])
     print(sorted_guards)
+    tag = 'young_guards'
     file_name = os.path.join(file_path, f"{today}_young_guards.md")
     with open(file_name, "w", encoding="utf-8") as file:
         i = 1
@@ -1373,11 +1352,13 @@ if __name__ == '__main__':
             else:
                 file.write(f"#### {i}. {player_data.get('chinese_name')}\n")
             file.write(
-                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\image\\{player_data.get('player_name')}.png)\n\n")
+                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{player_data.get('player_name')}_{tag}.png)\n\n")
+            pd_str = ImageUtils().format_draw_data(player_data.get('player_name'), tag, player_data.get('hit_rate'),
+                                                   player_data.get('data'))
 
             file.write(f"选秀：{player_data.get('team')}-**{player_data.get('draft_position')}**\n\n")
             file.write(f"{player_data.get('time')}\n\n")
-            file.write(f"数据：**{player_data.get('data')}**\n\n")
+            file.write(f"数据：**{pd_str}**\n\n")
             file.write(f"{player_data.get('hit_rate')}\n\n")
             file.write(f"比赛结果：{player_data.get('result')}\n\n")
 
