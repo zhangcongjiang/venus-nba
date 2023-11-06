@@ -26,11 +26,11 @@ if __name__ == '__main__':
 
         datas.append(data)
 
-    sorted_datas = sorted(datas, key=lambda x: x['this_score'], reverse=True)
+    sorted_datas = sorted(datas, key=lambda x: x['this_fg3'][0] / x['this_fg3'][1])
     today = datetime.now().strftime("%Y-%m-%d")
     file_name = f"F:\\notebooks\\其他\\draft\\{today}_{tag}.md"
     with open(file_name, "w", encoding="utf-8") as file:
-        i = 20
+        i = 18
         for data in reversed(sorted_datas):
             # if data['this_score'] < 10:
             #     continue
@@ -38,7 +38,16 @@ if __name__ == '__main__':
 
             print(data)
             file.write(f"#### {i}：**{data.get('this_team')}-{data.get('chinese_name')}**\n\n")
-            file.write(f"原选秀：**{data.get('draft_year')}**年第**{data.get('draft_position')}**顺位\n\n")
+            if not data.get('draft_position'):
+                file.write(f"原选秀：**{data.get('draft_year')}**年落选秀\n\n")
+            elif data.get('draft_position') == 1:
+                file.write(f"原选秀：**{data.get('draft_year')}**年状元秀\n\n")
+            elif data.get('draft_position') == 2:
+                file.write(f"原选秀：**{data.get('draft_year')}**年榜眼秀\n\n")
+            elif data.get('draft_position') == 3:
+                file.write(f"原选秀：**{data.get('draft_year')}**年探花秀\n\n")
+            else:
+                file.write(f"原选秀：**{data.get('draft_year')}**年第**{data.get('draft_position')}**顺位\n\n")
             ImageUtils().draw_text(data.get('code'), tag, data.get('this_hit_rate').replace("，", " | "), (
                 '┏',
                 '得分：', f"{data.get('this_data')[0]}",
@@ -54,5 +63,7 @@ if __name__ == '__main__':
             file.write(
                 f"本赛季数据：**{data.get('this_data')[0]}分 | {data.get('this_data')[1]}篮板 | {data.get('this_data')[2]}助攻 | {data.get('this_data')[3]}抢断 | {data.get('this_data')[4]}盖帽**\n\n")
             file.write(f"命中率：{data.get('this_hit_rate')}\n\n")
+            file.write(
+                f"投篮：{data.get('this_fg')[0]}/{data.get('this_fg')[1]}，三分球：{data.get('this_fg3')[0]}/{data.get('this_fg3')[1]}，罚球：{data.get('this_ft')[0]}/{data.get('this_ft')[1]}\n\n")
             # file.write(f"上赛季数据：**{data.get('last_data')}**\n\n")
             file.write("---\n\n")
