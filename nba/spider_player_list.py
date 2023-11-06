@@ -26,15 +26,14 @@ if __name__ == '__main__':
 
         datas.append(data)
 
-    sorted_datas = sorted(datas, key=lambda x: x['this_fg3'][0] / x['this_fg3'][1])
+    sorted_datas = sorted(datas, key=lambda x: x['this_fg3'][0] / x['this_fg3'][1], reverse=True)
     today = datetime.now().strftime("%Y-%m-%d")
     file_name = f"F:\\notebooks\\其他\\draft\\{today}_{tag}.md"
     with open(file_name, "w", encoding="utf-8") as file:
-        i = 18
+        i = len(sorted_datas)
         for data in reversed(sorted_datas):
             # if data['this_score'] < 10:
             #     continue
-            i -= 1
 
             print(data)
             file.write(f"#### {i}：**{data.get('this_team')}-{data.get('chinese_name')}**\n\n")
@@ -52,7 +51,7 @@ if __name__ == '__main__':
                 '┏',
                 '得分：', f"{data.get('this_data')[0]}",
                 '篮板：', f"{data.get('this_data')[1]}",
-                '助攻；', f"{data.get('this_data')[2]}",
+                '助攻：', f"{data.get('this_data')[2]}",
                 '抢断：', f"{data.get('this_data')[3]}",
                 '盖帽：', f"{data.get('this_data')[4]}",
                 '┛'))
@@ -67,3 +66,4 @@ if __name__ == '__main__':
                 f"投篮：{data.get('this_fg')[0]}/{data.get('this_fg')[1]}，三分球：{data.get('this_fg3')[0]}/{data.get('this_fg3')[1]}，罚球：{data.get('this_ft')[0]}/{data.get('this_ft')[1]}\n\n")
             # file.write(f"上赛季数据：**{data.get('last_data')}**\n\n")
             file.write("---\n\n")
+            i -= 1

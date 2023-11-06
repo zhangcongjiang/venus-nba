@@ -100,7 +100,7 @@ FROM public.player_active where id >0  order by id;
     for player in players:
         try:
             stat = get_player_stats(player)
-            random_number = random.randint(2, 4)
+            random_number = random.randint(0, 2)
             time.sleep(random_number)
         except Exception:
             print(traceback.format_exc())
