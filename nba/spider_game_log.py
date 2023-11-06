@@ -319,7 +319,7 @@ def get_user_info(url):
 if __name__ == '__main__':
     year = 2024
 
-    where = "id>447"
+    where = "id>0"
 
     sql = f"""SELECT id,player_name,href FROM public.player_active where {where} ORDER BY id ASC;"""
     players = execute_sql(sql)
@@ -357,6 +357,6 @@ if __name__ == '__main__':
         request_statics(response, player_name, year)
         print(f"player {player_id}:{player_name} {year} ok")
 
-        random_number = random.randint(3, 4)
+        random_number = random.randint(2, 4)
         time.sleep(random_number)
     print(f"{year}年所有运动员常规赛数据处理完毕")

@@ -30,7 +30,7 @@ for file_name in file_list:
         target_path = os.path.join(target_folder, file_name)
 
         # 保存修改后的图片
-        resized_img.save(target_path, quality=80)
+        resized_img.save(target_path, quality=85)
         file_size = os.path.getsize(target_path)
         file_size_mb = file_size / 1024 / 1024
         print(f"修改后{file_name}大小: {file_size_mb:.2f} MB")

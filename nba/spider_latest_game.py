@@ -894,104 +894,7 @@ young_stars = [
         'draft_position': "2018年12顺位",
     },
 ]
-young_guards = [
-    {
-        'player_name': 'tyrese_maxey',
-        'name': '泰雷斯·马克西',
-        'team': "76人",
-        'draft_position': "2020年第21顺位",
-    },
-    {
-        'player_name': 'cade_cunningham',
-        'name': '凯德·坎宁安',
-        'team': "活塞",
-        'draft_position': "2021年状元秀",
-    },
-    {
-        'player_name': 'jalen_green',
-        'name': '杰伦·格林',
-        'team': "火箭",
-        'draft_position': "2021年榜眼秀",
-    },
-    {
-        'player_name': 'jaden_ivey',
-        'name': '杰登·艾维',
-        'team': "活塞",
-        'draft_position': "2022年第5号顺位",
-    },
-    {
-        'player_name': 'tmp_bennedict_mathurin',
-        'name': '本尼迪克特·马瑟林',
-        'team': "步行者",
-        'draft_position': "2022年第6顺位",
-    },
-    {
-        'player_name': 'josh_giddey',
-        'name': '约什·吉迪',
-        'team': "雷霆",
-        'draft_position': "2021年第6顺位",
-    },
-    {
-        'player_name': 'shaedon_sharpe',
-        'name': '谢登·夏普',
-        'team': "开拓者",
-        'draft_position': "2022年第7顺位",
-    },
-    {
-        'player_name': 'cam_thomas',
-        'name': '卡梅伦·托马斯',
-        'team': "篮网",
-        'draft_position': "2020年第27顺位",
-    },
-    {
-        'player_name': 'lamelo_ball',
-        'name': '拉梅洛·鲍尔',
-        'team': "黄蜂",
-        'draft_position': "2020年探花秀",
-    },
-    {
-        'player_name': 'tyrese_haliburton',
-        'name': '泰瑞斯·哈利伯顿',
-        'team': "步行者",
-        'draft_position': "2020年第12顺位",
-    },
-    {
-        'player_name': 'cole_anthony',
-        'name': '科尔·安东尼',
-        'team': "魔术",
-        'draft_position': "2020年第15顺位",
-    },
-    {
-        'player_name': 'desmond_bane',
-        'name': '戴斯蒙德·贝恩',
-        'team': "灰熊",
-        'draft_position': "2020年第30顺位",
-    },
-    {
-        'player_name': 'jalen_suggs',
-        'name': '杰伦·萨格斯',
-        'team': "魔术",
-        'draft_position': "2021年第5顺位",
-    },
-    {
-        'player_name': 'immanuel_quickley',
-        'name': '伊曼纽尔·奎克利',
-        'team': "尼克斯",
-        'draft_position': "2020年第25顺位",
-    },
-    {
-        'player_name': 'anthony_edwards',
-        'name': '安东尼·爱德华兹',
-        'team': "森林狼",
-        'draft_position': "2020年状元秀",
-    },
-    {
-        'player_name': 'davion_mitchell',
-        'name': '达维昂·米切尔',
-        'team': "国王",
-        'draft_position': "2021年第9顺位",
-    },
-]
+
 game_log = {}
 
 file_path = "F:\\notebooks\\其他\\draft"
@@ -1172,8 +1075,6 @@ def read_markdown_file(file_path):
 
 
 if __name__ == '__main__':
-
-    hot_comments = get_comments()
     today = datetime.now().strftime("%Y-%m-%d")
 
     stats_rookies_2023 = []
@@ -1219,7 +1120,7 @@ if __name__ == '__main__':
             file.write(f"{player_data.get('result')}\n\n")
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
 
-            file.write(f"热评：{hot_comments.get(player_data.get('chinese_name'))}\n\n\n")
+            
             file.write("---\n\n")
             i += 1
 
@@ -1259,7 +1160,7 @@ if __name__ == '__main__':
             file.write(f"{player_data.get('hit_rate')}\n\n")
             file.write(f"{player_data.get('result')}\n\n")
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
-            file.write(f"热评：{hot_comments.get(player_data.get('chinese_name'))}\n\n\n")
+            
             file.write("---\n\n")
             i += 1
 
@@ -1291,7 +1192,7 @@ if __name__ == '__main__':
             file.write(f"{player_data.get('hit_rate')}\n\n")
             file.write(f"{player_data.get('result')}\n\n")
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
-            file.write(f"热评：{hot_comments.get(player_data.get('chinese_name'))}\n\n\n")
+            
             file.write("---\n\n")
             i += 1
 
@@ -1328,41 +1229,7 @@ if __name__ == '__main__':
             file.write(f"比赛结果：{player_data.get('result')}\n\n")
 
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
-            file.write(f"热评：{hot_comments.get(player_data.get('chinese_name'))}\n\n\n")
+            
             file.write("---\n\n")
             i += 1
 
-    for player in young_guards:
-        try:
-            stat_guards = get_player_stats(player)
-            if stat_guards:
-                stats_young_guards.append(stat_guards)
-        except Exception as e:
-            print(f"err,{player.get('draft_position')}")
-            print(traceback.format_exc())
-    sorted_guards = sorted(stats_young_guards, key=lambda x: x['eff'])
-    print(sorted_guards)
-    tag = 'young_guards'
-    file_name = os.path.join(file_path, f"{today}_young_guards.md")
-    with open(file_name, "w", encoding="utf-8") as file:
-        i = 1
-        for player_data in sorted_guards:
-            if i == len(sorted_guards):
-                file.write(f"#### {i}. **今日之星**：{player_data.get('chinese_name')}\n")
-            else:
-                file.write(f"#### {i}. {player_data.get('chinese_name')}\n")
-            file.write(
-                f"![{player_data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{player_data.get('player_name')}_{tag}.png)\n\n")
-            pd_str = ImageUtils().format_draw_data(player_data.get('player_name'), tag, player_data.get('hit_rate'),
-                                                   player_data.get('data'))
-
-            file.write(f"选秀：{player_data.get('team')}-**{player_data.get('draft_position')}**\n\n")
-            file.write(f"{player_data.get('time')}\n\n")
-            file.write(f"数据：**{pd_str}**\n\n")
-            file.write(f"{player_data.get('hit_rate')}\n\n")
-            file.write(f"比赛结果：{player_data.get('result')}\n\n")
-
-            file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
-            file.write(f"热评：{hot_comments.get(player_data.get('chinese_name'))}\n\n\n")
-            file.write("---\n\n")
-            i += 1
