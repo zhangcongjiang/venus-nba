@@ -15,6 +15,7 @@ from email.mime.multipart import MIMEMultipart
 from bs4 import BeautifulSoup
 
 from nba.image_utils import ImageUtils
+from nba.sqlUtils import get_sql
 
 old_rockets = [
     {
@@ -1080,7 +1081,7 @@ if __name__ == '__main__':
     stats_rookies_2023 = []
     stats_rookies_2022 = []
     stats_old_rockets = []
-    stats_big_contracts = []
+    stats_today_players = []
     stats_big_stars = []
     stats_young_guards = []
     for player in rookies_2023:
@@ -1098,7 +1099,7 @@ if __name__ == '__main__':
     with open(file_name, "w", encoding="utf-8") as file:
         file.write(
             f"北京时间：{today}，NBA比赛继续进行，今日共有{len(game_log.keys())}场比赛，{len(sorted_rookies_2023)}位新秀代表球队出战超过5分钟。\n\n")
-        file.write(f"我们看看新秀们表现如何，按照表现好坏从差到好依次排序。\n\n")
+        file.write(f"我们看看新秀们表现如何，按照表现好坏从好到差依次排序。\n\n")
         i = 1
         for player_data in sorted_rookies_2023:
             if i == 1:
@@ -1120,7 +1121,6 @@ if __name__ == '__main__':
             file.write(f"{player_data.get('result')}\n\n")
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
 
-            
             file.write("---\n\n")
             i += 1
 
@@ -1140,7 +1140,7 @@ if __name__ == '__main__':
     with open(file_name, "w", encoding="utf-8") as file:
         file.write(
             "2022届新秀进入第二年，历史上的巨星们基本上在前两年就打出了名堂，我们看看今天二年级的新秀们表现如何。\n\n")
-        file.write("**以下排名基于场上表现好坏，由差到好依次排列：**\n\n")
+        file.write("**以下排名基于场上表现好坏，由好到差依次排列：**\n\n")
         i = 1
         for player_data in sorted_rookies_2022:
             if i == 1:
@@ -1160,7 +1160,7 @@ if __name__ == '__main__':
             file.write(f"{player_data.get('hit_rate')}\n\n")
             file.write(f"{player_data.get('result')}\n\n")
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
-            
+
             file.write("---\n\n")
             i += 1
 
@@ -1192,7 +1192,7 @@ if __name__ == '__main__':
             file.write(f"{player_data.get('hit_rate')}\n\n")
             file.write(f"{player_data.get('result')}\n\n")
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
-            
+
             file.write("---\n\n")
             i += 1
 
@@ -1229,7 +1229,8 @@ if __name__ == '__main__':
             file.write(f"比赛结果：{player_data.get('result')}\n\n")
 
             file.write(f"近5场比赛：**{player_data.get('last_5_games')}**\n\n")
-            
+
             file.write("---\n\n")
             i += 1
+
 

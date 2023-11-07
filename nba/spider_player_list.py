@@ -1,26 +1,27 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, date
+from datetime import datetime
 
-import requests
 
-from nba.constants import nba_teams
-import nba.nba_utils
 from nba.image_utils import ImageUtils
-from nba.nba_utils import get_player_last_season_data, get_person_info
-from nba.sqlUtils import store_to_db, get_sql
+from nba.nba_utils import get_person_info
+from nba.sqlUtils import get_sql
 
 if __name__ == '__main__':
 
     usa_players = ['Paolo Banchero', 'Austin Reaves', 'Josh Hart', 'Cameron Johnson', 'Walker Kessler', 'Mikal Bridges',
                    'Anthony Edwards', 'Tyrese Haliburton', 'Brandon Ingram', 'Jaren Jackson Jr.', 'Bobby Portis',
                    'Jalen Brunson']
+    # 选秀年过滤
     players = get_sql("select player_name from public.player_active where draft_year <2009 ;")
+    # 三分命中率过滤
     players = get_sql(
         "SELECT player_name FROM public.player_regular_gamelog WHERE season=2024 GROUP BY player_name HAVING SUM(fg3a) > 10 and (SUM(fg3) / SUM(fg3a::float)) < 0.2;")
-
+    # 每日最佳数据
+    players = get_sql(
+        "SELECT player_name FROM public.player_regular_gamelog where game_date =CURRENT_DATE ORDER BY (pts + reb + ast + stl + blk) DESC LIMIT 3;")
     players = [player.get('player_name') for player in players]
     datas = []
-    tag = "fg3a"
+    tag = "today"
     for p in players:
         data = get_person_info(p.replace("'", "''"))
 
