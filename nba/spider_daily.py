@@ -48,7 +48,7 @@ def get_player_stats(player):
                     'displayAbbr')
 
                 win_or_loss = profile.get('winOrLoss')
-                win = True if win_or_loss == 'won' else False
+                win = True if win_or_loss == 'Won' else False
 
                 stat = game.get('statTotal', {})
                 min = int(stat.get('mins'))
@@ -76,7 +76,8 @@ def get_player_stats(player):
                         player.get('player_name'), 2024, today, True, up_time, pts, rebs, 0, 0, asts,
                         int(stat.get('fga')),
                         int(stat.get('fgm')), int(stat.get('tpa')), int(stat.get('tpm')), int(stat.get('fta')),
-                        int(stat.get('ftm')), stls, blks, tov, 0, '', '', win)
+                        int(stat.get('ftm')), stls, blks, tov, 0, profile.get('teamProfile', {}).get('displayAbbr'),
+                        profile.get('oppTeamProfile', {}).get('displayAbbr'), win)
 
                     sql = """
                     INSERT INTO public.player_regular_gamelog

@@ -61,7 +61,14 @@ rookies_2023 = [
         'draft_position': "榜眼秀",
         'draft_year': 2023,
         'name': '布兰登·米勒'
-    }, {
+    },
+    {
+        'player_name': 'chet_holmgren',
+        'draft_position': "榜眼",
+        'draft_year': 2022,
+        'name': '切特·霍姆格伦'
+    },
+    {
         'player_name': 'scoot_henderson',
         'draft_position': "探花秀",
         'draft_year': 2023,
@@ -357,11 +364,6 @@ rookies_2022 = [
         'draft_position': "状元",
         'draft_year': 2022,
         'name': '保罗·班切罗'
-    }, {
-        'player_name': 'chet_holmgren',
-        'draft_position': "榜眼",
-        'draft_year': 2022,
-        'name': '切特·霍姆格伦'
     }, {
         'player_name': 'jabari_smith',
         'draft_position': "探花",
@@ -1232,5 +1234,3 @@ if __name__ == '__main__':
 
             file.write("---\n\n")
             i += 1
-
-
