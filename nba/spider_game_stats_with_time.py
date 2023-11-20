@@ -730,7 +730,7 @@ if __name__ == '__main__':
             i += 1
 
     for player in draft_2023:
-        if player.get('draft_position') > 30:
+        if player.get('draft_position') > 0:
             try:
                 stat_2023 = get_player_stats(player)
                 if stat_2023:

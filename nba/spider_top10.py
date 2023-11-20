@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, date
+from datetime import datetime
 
-import requests
-
-from nba.constants import nba_teams
-from nba.nba_utils import get_player_last_season_data
-from nba.sqlUtils import store_to_db, get_sql
+from tools.nba_utils import get_player_last_season_data
+from tools.sqlUtils import get_sql
 
 if __name__ == '__main__':
     sql = """select id, code,player_name,chinese_name,draft_year,team,draft_position from public.player_active  where draft_year<2009  order by draft_year desc,draft_position desc limit 20;"""

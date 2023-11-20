@@ -7,7 +7,7 @@ from datetime import datetime, date
 
 import requests
 
-from nba.sqlUtils import get_sql, store_to_db
+from tools.sqlUtils import get_sql, store_to_db
 
 
 def get_player_stats(player):
@@ -93,7 +93,7 @@ def get_player_stats(player):
 
 if __name__ == '__main__':
     sql = """
-        SELECT id, player_id, code, player_name, chinese_name, draft_year, draft_position, team, team_en, height, body_weight, "position"
+        SELECT *
 FROM public.player_active where id >0  order by id;
     """
 

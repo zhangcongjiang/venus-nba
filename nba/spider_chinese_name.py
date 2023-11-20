@@ -1,22 +1,10 @@
 # -*- coding: utf-8 -*-
-import os
-import random
-import markdown
 
-import subprocess
 import time
-import traceback
-from datetime import datetime, date
-from email.message import EmailMessage
 
 import requests
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 
-from bs4 import BeautifulSoup
-
-from nba.sqlUtils import update_signal
+from tools.sqlUtils import update_signal
 
 old_rockets = [
     {

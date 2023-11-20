@@ -14,42 +14,9 @@ from email.mime.multipart import MIMEMultipart
 
 from bs4 import BeautifulSoup
 
-from nba.image_utils import ImageUtils
-from nba.sqlUtils import get_sql
+from tools.image_utils import ImageUtils
 
-old_rockets = [
-    {
-        'player_name': 'tyty_washington',
-        'draft_position': 29,
-        'name': '泰泰·华盛顿',
-        'activity': False,
-    },
-    {
-        'player_name': 'daishen_nix',
-        'draft_position': '落选',
-        'name': '戴申·尼克斯',
-        'activity': False,
-    },
-    {
-        'player_name': 'josh_christopher',
-        'draft_position': 24,
-        'name': '约什·克里斯托弗',
-        'activity': False,
-    },
-    {
-        'player_name': 'usman_garuba',
-        'draft_position': 23,
-        'name': '乌斯曼-加鲁巴',
-        'activity': False,
-    },
-    {
-        'player_name': 'kenyon_martin_jr',
-        'draft_position': 52,
-        'name': '小肯扬·马丁',
-        'activity': False,
-    },
 
-]
 rookies_2023 = [
     {
         'player_name': 'tmp_victor_wembanyama',

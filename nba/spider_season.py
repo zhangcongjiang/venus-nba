@@ -2,13 +2,13 @@ import datetime
 import random
 
 import requests
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup
 import time
 
 from selenium.webdriver.firefox.options import Options
 import psycopg2
 
-from nba.sqlUtils import update_signal
+from tools.sqlUtils import update_signal
 
 
 class PsqlConnect:

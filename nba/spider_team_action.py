@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, date
+from datetime import datetime
 
-import requests
-
-from nba.constants import nba_teams
-from nba.nba_utils import get_player_last_season_data, get_game_data, get_game_log_with_team, handle_game
-from nba.sqlUtils import store_to_db, get_sql
+from tools.nba_utils import get_game_log_with_team, handle_game
 
 if __name__ == '__main__':
     games, ave = get_game_log_with_team('James Harden', 'PHI')

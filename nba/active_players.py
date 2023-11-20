@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, date
+from datetime import datetime
 
 import requests
 
 from nba.constants import nba_teams
-from nba.sqlUtils import store_to_db, get_sql
+from tools.sqlUtils import store_to_db, get_sql
 
 
 def get_all_active_players():

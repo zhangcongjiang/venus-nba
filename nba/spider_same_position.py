@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime, date
-
-import requests
+from datetime import datetime
 
 from nba.constants import nba_teams
-from nba.image_utils import ImageUtils
-from nba.nba_utils import get_player_last_season_data, get_game_data
-from nba.sqlUtils import store_to_db, get_sql
+from tools.image_utils import ImageUtils
+from tools.nba_utils import NbaUtils
+from tools.sqlUtils import get_sql
 
 young_guards = [
     {
@@ -250,21 +248,36 @@ big_options = [
     },
 ]
 
+nba_utils = NbaUtils()
+
 
 def same_position():
-    sql = """select player_name, draft_year, team,chinese_name,code  from public.player_draft where options =1 and draft_year >=2000;"""
+    sql = """select player_name, draft_year, team,chinese_name,code  from public.player_draft where draft_position =1 and draft_year >=2000;"""
     players = get_sql(sql)
     datas = []
     for p in players:
         print(p)
-        sql = f"""SELECT id, player_name, season, game_date, up, playing_time, pts, reb, oreb, dreb, ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, plus_minus, team, opp, game_win FROM public.player_regular_gamelog where player_name ='{p.get('player_name')}' and up=True order by  game_date  limit 5 ;
+        sql = f"""SELECT id, player_name, season, game_date, up, playing_time, pts, reb, oreb, dreb, ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, plus_minus, team, opp, game_win FROM public.player_regular_gamelog where player_name ='{p.get('player_name')}' and up=True order by  game_date  limit 10 ;
                             """
-        first_data = get_game_data(sql)
+        first_data = nba_utils.get_game_data(sql)
         first_data['player_name'] = p.get('player_name')
         first_data['draft_year'] = p.get('draft_year')
         first_data['chinese_name'] = p.get('chinese_name')
         first_data['code'] = p.get('code')
-        first_data['team'] = nba_teams.get(p.get('team'))
+        first_data['team'] = p.get('team')
+        sql = f"""SELECT COUNT(*) as num_games
+FROM public.player_regular_gamelog
+WHERE player_name = '{p.get('player_name')}' 
+  AND up = False 
+  AND game_date < (SELECT game_date 
+                   FROM public.player_regular_gamelog 
+                   WHERE player_name = '{p.get('player_name')}' 
+                     AND up = True 
+                   ORDER BY game_date 
+                   LIMIT 1)
+"""
+        num_games = get_sql(sql)
+        first_data['num_games'] = num_games[0].get('num_games')
         datas.append(first_data)
     sorted_datas = sorted(datas, key=lambda x: x['score'] + x['win'], reverse=True)
     today = datetime.now().strftime("%Y-%m-%d")
@@ -274,15 +287,20 @@ def same_position():
         i = 0
         for p in sorted_datas:
             i += 1
-            file.write(f"#### 第{i}位. {p.get('draft_year')}-{p.get('team')}-**{p.get('chinese_name')}**\n\n")
-            pd_str = ImageUtils().format_draw_data(p.get('code'), tag, p.get('hit_rate').replace("，", " | "),
+            file.write(f"#### 第{i}位. **{p.get('chinese_name')}**\n\n")
+            pd_str = ImageUtils().format_draw_data(p.get('code'),p.get('team'), tag, p.get('hit_rate').replace("，", " | "),
                                                    p.get('data'))
             file.write(
                 f"![{p.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{p.get('code')}_{tag}.png)\n\n")
 
             print({p.get('player_name')}, p)
-            file.write(f"战绩：{p.get('win')}胜{p.get('loss')}负\n\n")
-            file.write(f"数据：**{pd_str}**\n\n")
+            file.write(f"**{p.get('draft_year')}年状元秀（{nba_teams.get(p.get('team'))}）**\n\n")
+            file.write(f"前十场战绩：{p.get('win')}胜{p.get('loss')}负，")
+            if not p.get('num_games'):
+                file.write("赛季前十场全勤\n\n")
+            else:
+                file.write(f"赛季前十场缺战{p.get('num_games')}场\n\n")
+            file.write(f"场均数据：**{pd_str}**\n\n")
             file.write(f"命中率：{p.get('hit_rate')}\n\n")
 
             file.write("---\n\n")
@@ -296,7 +314,7 @@ def player_list():
                 'player_name')
         sql = f"""SELECT id, player_name, season, game_date, up, playing_time, pts, reb, oreb, dreb, ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, plus_minus, team, opp, game_win FROM public.player_regular_gamelog where player_name ='{player_name}' and up=True and season=2024 ;
                             """
-        data = get_game_data(sql)
+        data = nba_utils.get_game_data(sql)
         data['options'] = p.get('options')
         data['team'] = p.get('team')
         data['name'] = p.get('name')
@@ -326,4 +344,4 @@ def player_list():
 
 
 if __name__ == '__main__':
-    player_list()
+    same_position()

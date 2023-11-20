@@ -212,3 +212,39 @@ set href=public.player_draft.href from public.player_draft where public.player_a
 UPDATE public.player_draft
 SET player_name = REPLACE(player_name, 'Š', 'S')
 WHERE player_name LIKE '%Š%';
+
+-- 三分球命中率最低的球员
+SELECT player_name FROM public.player_regular_gamelog WHERE season=2024 GROUP BY player_name HAVING SUM(fg3a) > 10 and (SUM(fg3) / SUM(fg3a::float)) < 0.2;
+
+--今日最佳数据
+SELECT * FROM public.player_regular_gamelog where game_date =CURRENT_DATE ORDER BY (pts + reb + ast + stl + blk) DESC LIMIT 1;
+
+--按月统计得分数据
+SELECT EXTRACT(YEAR FROM game_date) AS year, EXTRACT(MONTH FROM game_date) AS month,SUM(pts) AS total_points FROM public.player_regular_gamelog WHERE player_name = 'James Harden' GROUP BY EXTRACT(YEAR FROM game_date), EXTRACT(MONTH FROM game_date) ORDER BY year, month;
+-- 找到运动员最佳表现赛季
+SELECT *, (pts + reb + ast + stl + blk) / game_attend AS avg_performance FROM public.player_regular_total_season where player_name ='James Harden' ORDER BY avg_performance DESC LIMIT 1;
+-- 查找火箭选中的现役所有球员
+SELECT prg.*
+FROM public.player_draft prg
+INNER JOIN public.player_active pa
+ON prg.player_name = pa.player_name
+WHERE  prg.team = 'HOU' order by prg.draft_year;
+
+--查找每支球队场均得分最多的球员
+WITH team_avg_pts AS (
+    SELECT
+        team,
+        player_name,
+        AVG(pts) AS avg_pts
+    FROM
+        public.player_regular_gamelog
+    WHERE
+        pts !=0 and season=2024
+    GROUP BY
+        team,
+        player_name
+)
+SELECT DISTINCT ON (team) team, player_name, avg_pts
+FROM team_avg_pts
+ORDER BY team, avg_pts DESC;
+

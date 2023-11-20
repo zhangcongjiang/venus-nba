@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import random
 import sys
 
@@ -6,50 +6,10 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-import psycopg2
 
+from tools.sqlUtils import store_to_db, get_sql
 
-class PsqlConnect:
-
-    @staticmethod
-    def connect(host, database, user, password, port):
-        conn = psycopg2.connect(
-            host=host,
-            database=database,
-            user=user,
-            password=password,
-            port=port
-        )
-        return conn
-
-
-def execute_sql(sql):
-    psql = PsqlConnect()
-    conn = psql.connect(host="10.67.0.165",
-                        database="spider",
-                        user="postgres",
-                        password="postgres",
-                        port="5432")
-
-    cur = conn.cursor()
-
-    cur.execute(sql)
-    rows = cur.fetchall()
-
-    # 定义一个空列表，用于存储转换后的字典
-    result = []
-
-    # 遍历查询结果，并将每一行转换为字典
-    for row in rows:
-        # 将查询结果的列名和对应的值组成键值对，并添加到字典中
-        row_dict = dict(zip([column[0] for column in cur.description], row))
-        # 将字典添加到结果列表中
-        result.append(row_dict)
-
-    cur.close()
-    conn.close()
-
-    return result
+today = datetime.now().strftime("%Y-%m-%d")
 
 
 def request_statics(response, name, year):
@@ -72,6 +32,9 @@ def request_statics(response, name, year):
             if tr.get('class') and 'thead' in tr.get('class'):
                 continue
             date_game = tr.find('td', {'data-stat': 'date_game'}).text
+            if date_game != today:
+                continue
+
             team = tr.find('td', {'data-stat': 'team_id'}).text
             opp = tr.find('td', {'data-stat': 'opp_id'}).text
             # game_id = tr.find('th', {'data-stat': 'ranker'}).text
@@ -166,7 +129,7 @@ def request_statics(response, name, year):
             VALUES (%s, %s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT DO NOTHING;
         """
-        store_data_to_db(regular_data, sql)
+        store_to_db(sql,regular_data)
 
     # try:
     #     playoffs_table = soup.find('table', {'id': 'pgl_basic_playoffs'})
@@ -269,29 +232,6 @@ def request_statics(response, name, year):
     #     store_data_to_db(regular_data, 'player_playoffs_gamelog')
 
 
-def store_data_to_db(data, sql):
-    # 连接到数据库
-    psql = PsqlConnect()
-    conn = psql.connect(host="10.67.0.165",
-                        database="spider",
-                        user="postgres",
-                        password="postgres",
-                        port="5432")
-
-    print(data)
-
-    # 创建一个游标对象
-    cur = conn.cursor()
-    start = int(time.time())
-    cur.executemany(sql, data)
-    stop = int(time.time())
-    print(f"写入数据库耗时：{stop - start},当前时间{datetime.datetime.now()}")
-    # 提交更改
-    conn.commit()
-    # 关闭游标和连接
-    cur.close()
-    conn.close()
-
 
 def get_user_info(url):
     response = requests.get(url)
@@ -322,7 +262,7 @@ if __name__ == '__main__':
     where = "id>0"
 
     sql = f"""SELECT id,player_name,href FROM public.player_active where {where} ORDER BY id ASC;"""
-    players = execute_sql(sql)
+    players = get_sql(sql)
     for player in players:
         player_name = player.get('player_name')
         player_url = player.get('href')

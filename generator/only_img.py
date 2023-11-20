@@ -77,7 +77,7 @@ if __name__ == '__main__':
         {
             "time": "沃克·凯斯勒（爵士）",
             "title": "与班切罗一样，凯斯勒也进入了美国国家队最终12人的大名单，将代表美国出战男篮世界杯，因此也没有参加本届夏季联赛。",
-            "img_path": "F:\\pycharm_workspace\\venus\\src\\img_1.png"
+            "img_path": "F:\\pycharm_workspace\\venus\\src\\josh_okogie.png"
         },
         {
             "time": "杰伦·威廉姆斯（雷霆）",

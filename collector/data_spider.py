@@ -1,13 +1,13 @@
-import datetime
 import traceback
 
 import requests
 from bs4 import BeautifulSoup
 import time
 
-from collector.database import PsqlConnect
+
 from settings import REDIS_DATA_TIMEOUT
 from tools.redis_tools import ControlRedis
+from tools.sqlUtils import store_to_db
 
 
 def download_page(url):
@@ -62,35 +62,11 @@ def get_content(html, tag):
             pass
 
     if data:
-        store_data_to_db(data, tag)
-
-
-def store_data_to_db(data, tag):
-    # 连接到数据库
-    psql = PsqlConnect()
-    conn = psql.connect(host="localhost",
-                        database="spider",
-                        user="postgres",
-                        password="postgres",
-                        port="5432")
-
-    print(data)
-    sql = f"""INSERT INTO public.hot_{tag} ("author", "type","rank","msg","hots", "category")
-            VALUES (%s, %s,%s, %s,%s,%s)
-            ON CONFLICT DO NOTHING;
-            """
-
-    # 创建一个游标对象
-    cur = conn.cursor()
-    start = int(time.time())
-    cur.executemany(sql, data)
-    stop = int(time.time())
-    print(f"写入{tag}数据库耗时：{stop - start},当前时间{datetime.datetime.now()}")
-    # 提交更改
-    conn.commit()
-    # 关闭游标和连接
-    cur.close()
-    conn.close()
+        sql = f"""INSERT INTO public.hot_{tag} ("author", "type","rank","msg","hots", "category")
+                VALUES (%s, %s,%s, %s,%s,%s)
+                ON CONFLICT DO NOTHING;
+                """
+        store_to_db(sql, data)
 
 
 def main():
