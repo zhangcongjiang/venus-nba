@@ -10,10 +10,10 @@ class Psql:
     def connect():
         #云端
         # conn = psycopg2.connect(host="39.98.165.125",
-        #                         database="postgres",
+        #                         database="siper",
         #                         user="postgres",
-        #                         password="postgres",
-        #                         port="5432")
+        #                         password="nsf0cus.@123",
+        #                         port="12345")
         #本地
         conn = psycopg2.connect(host="10.67.0.165",
                                 database="spider",

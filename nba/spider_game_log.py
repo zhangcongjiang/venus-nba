@@ -32,8 +32,8 @@ def request_statics(response, name, year):
             if tr.get('class') and 'thead' in tr.get('class'):
                 continue
             date_game = tr.find('td', {'data-stat': 'date_game'}).text
-            if date_game != today:
-                continue
+            # if date_game != today:
+            #     continue
 
             team = tr.find('td', {'data-stat': 'team_id'}).text
             opp = tr.find('td', {'data-stat': 'opp_id'}).text
