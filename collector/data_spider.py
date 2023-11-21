@@ -4,10 +4,28 @@ import requests
 from bs4 import BeautifulSoup
 import time
 
-
+import logging
+from logging.handlers import TimedRotatingFileHandler
 from settings import REDIS_DATA_TIMEOUT
 from tools.redis_tools import ControlRedis
 from tools.sqlUtils import store_to_db
+
+# 创建一个logger
+logger = logging.getLogger('nba.log')
+logger.setLevel(logging.DEBUG)
+
+# 创建一个handler，用于写入日志文件，每天切换一次
+log_file_path = "/var/log/venus/nba.log"
+handler = TimedRotatingFileHandler(log_file_path, when="midnight", interval=1, backupCount=15)
+handler.suffix = "%Y%m%d"
+handler.setLevel(logging.DEBUG)
+
+# 定义handler的输出格式
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+# 将handler添加到logger中
+logger.addHandler(handler)
 
 
 def download_page(url):
@@ -18,7 +36,6 @@ def download_page(url):
         return r.text
     except:
         return "please inspect your url or setup"
-
 
 
 def get_content(html, tag):
@@ -66,6 +83,7 @@ def get_content(html, tag):
                 VALUES (%s, %s,%s, %s,%s,%s)
                 ON CONFLICT DO NOTHING;
                 """
+        logger.info(data)
         store_to_db(sql, data)
 
 

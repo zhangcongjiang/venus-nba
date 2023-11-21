@@ -225,6 +225,57 @@ def improvement_player(players):
     print(improvement_players)
 
 
+def career_data(players, tag):
+    player_datas = []
+    for player in players:
+        player_name = player.get('player_name').replace("'", "''")
+        career = nba_utils.career_data(player_name)
+
+        basic_info = nba_utils.get_basic_info(player_name)
+        career.update(basic_info)
+        player_datas.append(career)
+
+    sorted_datas = sorted(player_datas, key=lambda x: x['total_rebounds'], reverse=True)
+    file_name = os.path.join(file_path, f"{today}_{tag}.md")
+    with open(file_name, "w", encoding="utf-8") as file:
+        i = 20
+        for data in reversed(sorted_datas[:20]):
+            print(data)
+            file.write(f"#### {i}：**{data.get('chinese_name')}**\n\n")
+
+            if not data.get('draft_position'):
+                file.write(f"选秀：**{data.get('draft_year')}**年落选秀\n\n")
+            elif data.get('draft_position') == 1:
+                file.write(f"选秀：**{data.get('draft_year')}**年状元秀\n\n")
+            elif data.get('draft_position') == 2:
+                file.write(f"选秀：**{data.get('draft_year')}**年榜眼秀\n\n")
+            elif data.get('draft_position') == 3:
+                file.write(f"选秀：**{data.get('draft_year')}**年探花秀\n\n")
+            else:
+                file.write(
+                    f"选秀：**{data.get('draft_year')}**年第**{data.get('draft_position')}**顺位\n\n")
+            teams = data.get('teams_played_for')
+            team = '、'.join([nba_teams.get(item) for item in teams])
+            file.write(f"总篮板：**{data.get('total_rebounds')}**\n\n")
+            file.write(f"球队：生涯共效力过**{team}**{len(teams)}支球队，累计出战**{data.get('total_games')}**场比赛\n\n")
+            hit_rate = f"投篮，{data.get('hit_rate')[0]}% | 三分，{data.get('hit_rate')[1]}% | 罚球，{data.get('hit_rate')[2]}%"
+            ImageUtils().draw_text(data.get('code'), data.get('teams_played_for')[-1], tag,
+                                   hit_rate, (
+                                       '┏',
+                                       '得分：', f"{data.get('data')[0]}",
+                                       '篮板：', f"{data.get('data')[1]}",
+                                       '助攻：', f"{data.get('data')[2]}",
+                                       '抢断：', f"{data.get('data')[3]}",
+                                       '盖帽：', f"{data.get('data')[4]}",
+                                       '┛'), i)
+            file.write(
+                f"![{data.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{data.get('code')}_{tag}_{i}.png)\n\n")
+            file.write(
+                f"生涯数据：**{data.get('data')[0]}分 | {data.get('data')[1]}篮板 | {data.get('data')[2]}助攻 | {data.get('data')[3]}抢断 | {data.get('data')[4]}盖帽**\n\n")
+            file.write(f"命中率：{hit_rate}\n\n")
+            i -= 1
+
+
 def season_data(players, tag):
     player_datas = []
     for player in players:
@@ -297,10 +348,10 @@ if __name__ == '__main__':
     # player_list = get_sql(
     #     "select * from public.player_draft where draft_position =16 and draft_year>2001 and draft_year <2023 order by draft_year;")
     # season_data(player_list, 17)
-    water_players = get_sql(
-        "select * from public.player_draft where draft_year =2022  order by draft_year,draft_position;")
-    result = [player.get('player_name') for player in water_players]
-    this_season(result, '2021')
+    # water_players = get_sql(
+    #     "select * from public.player_draft where draft_year =2022  order by draft_year,draft_position;")
+    # result = [player.get('player_name') for player in water_players]
+    # this_season(result, '2021')
     # 现役球员
     # player_list = get_sql("select player_name from public.player_active;")
     # players = [player.get('player_name') for player in player_list]
@@ -332,3 +383,7 @@ if __name__ == '__main__':
     # player_list = get_sql(sql)
     # players = [player.get('player_name') for player in player_list]
     # this_season(players, 'no_win')
+
+    sql = "select * from public.player_active where draft_year<=2018 and draft_position>0;"
+    player_list = get_sql(sql)
+    career_data(player_list, 'top20')

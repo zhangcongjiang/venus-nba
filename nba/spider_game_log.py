@@ -5,9 +5,28 @@ import sys
 import requests
 from bs4 import BeautifulSoup
 import time
-
+import logging
+from logging.handlers import TimedRotatingFileHandler
+import os
 
 from tools.sqlUtils import store_to_db, get_sql
+
+# 创建一个logger
+logger = logging.getLogger('nba.log')
+logger.setLevel(logging.DEBUG)
+
+# 创建一个handler，用于写入日志文件，每天切换一次
+log_file_path = "/var/log/venus/nba.log"
+handler = TimedRotatingFileHandler(log_file_path, when="midnight", interval=1, backupCount=15)
+handler.suffix = "%Y%m%d"
+handler.setLevel(logging.DEBUG)
+
+# 定义handler的输出格式
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+
+# 将handler添加到logger中
+logger.addHandler(handler)
 
 today = datetime.now().strftime("%Y-%m-%d")
 
@@ -32,8 +51,8 @@ def request_statics(response, name, year):
             if tr.get('class') and 'thead' in tr.get('class'):
                 continue
             date_game = tr.find('td', {'data-stat': 'date_game'}).text
-            # if date_game != today:
-            #     continue
+            if date_game != today:
+                continue
 
             team = tr.find('td', {'data-stat': 'team_id'}).text
             opp = tr.find('td', {'data-stat': 'opp_id'}).text
@@ -129,7 +148,7 @@ def request_statics(response, name, year):
             VALUES (%s, %s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT DO NOTHING;
         """
-        store_to_db(sql,regular_data)
+        store_to_db(sql, regular_data)
 
     # try:
     #     playoffs_table = soup.find('table', {'id': 'pgl_basic_playoffs'})
@@ -232,7 +251,6 @@ def request_statics(response, name, year):
     #     store_data_to_db(regular_data, 'player_playoffs_gamelog')
 
 
-
 def get_user_info(url):
     response = requests.get(url)
 
@@ -291,12 +309,12 @@ if __name__ == '__main__':
 
         result = requests.get(player_url, headers=headers)
         if result.status_code != 200:
-            print(result)
+            logger.error(result)
             sys.exit()
         response = result.text
         request_statics(response, player_name, year)
-        print(f"player {player_id}:{player_name} {year} ok")
+        logger.info(f"player {player_id}:{player_name} {year} ok")
 
         random_number = random.randint(2, 4)
         time.sleep(random_number)
-    print(f"{year}年所有运动员常规赛数据处理完毕")
+    logger.info(f"{year}年所有运动员常规赛数据处理完毕")

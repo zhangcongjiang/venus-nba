@@ -9,17 +9,17 @@ class Psql:
     @staticmethod
     def connect():
         #云端
-        # conn = psycopg2.connect(host="39.98.165.125",
-        #                         database="siper",
-        #                         user="postgres",
-        #                         password="nsf0cus.@123",
-        #                         port="12345")
-        #本地
-        conn = psycopg2.connect(host="10.67.0.165",
-                                database="spider",
+        conn = psycopg2.connect(host="39.98.165.125",
+                                database="siper",
                                 user="postgres",
-                                password="postgres",
-                                port="5432")
+                                password="nsf0cus.@123",
+                                port="12345")
+        #本地
+        # conn = psycopg2.connect(host="10.67.0.165",
+        #                         database="spider",
+        #                         user="postgres",
+        #                         password="postgres",
+        #                         port="5432")
         return conn
 
 
@@ -58,7 +58,7 @@ def store_to_db(sql, data):
     start = int(time.time())
     cur.executemany(sql, data)
     stop = int(time.time())
-    print(f"写入数据库耗时：{stop - start},当前时间{datetime.datetime.now()}")
+    print(f"{len(data)}条数据，写入数据库耗时：{stop - start},当前时间{datetime.datetime.now()}")
     # 提交更改
     conn.commit()
     # 关闭游标和连接

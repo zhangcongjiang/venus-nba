@@ -90,9 +90,48 @@ class NbaUtils:
 
         return ave
 
-    def get_game_log(self, sql):
-        games = get_sql(sql)
-        return games
+    def career_data(self, player_name):
+        sql = f"""SELECT
+                player_name,
+                SUM(pts) AS total_points,
+                SUM(reb) AS total_rebounds,
+                SUM(ast) AS total_assists,
+                SUM(blk) AS total_blocks,
+                SUM(stl) AS total_steals,
+                SUM(tov) AS total_tovs,
+                SUM(fg) AS total_fg,
+                SUM(fga) AS total_fga,
+                SUM(fg3a) AS total_fg3a,
+                SUM(fg3) AS total_fg3,
+                SUM(ft) AS total_ft,
+                SUM(fta) AS total_fta,
+                COUNT(*) AS total_games,
+                ARRAY_AGG(DISTINCT team) AS teams_played_for
+            FROM
+                public.player_regular_gamelog
+            WHERE
+                player_name = '{player_name}' and up=true
+            GROUP BY
+                player_name;
+            """
+        result = get_sql(sql)
+        hit_rate = (round(result[0].get('total_fg') * 100 / result[0].get('total_fga'), 1),
+                    round(result[0].get('total_fg3') * 100 / (result[0].get('total_fg3a') if result[0].get(
+                        'total_fg3a') else 1), 1),
+                    round(result[0].get('total_ft') * 100 / result[0].get('total_fta'), 1))
+        data = (round(result[0].get('total_points') / result[0].get('total_games'), 1),
+                round(result[0].get('total_rebounds') / result[0].get('total_games'), 1),
+                round(result[0].get('total_assists') / result[0].get('total_games'), 1),
+                round(result[0].get('total_blocks') / result[0].get('total_games'), 1),
+                round(result[0].get('total_steals') / result[0].get('total_games'), 1),
+                round(result[0].get('total_tovs') / result[0].get('total_games'), 1)
+                )
+        ave_data = {
+            'hit_rate': hit_rate,
+            'data': data
+        }
+        ave_data.update(result[0])
+        return ave_data
 
     def get_game_log_with_team(self, player, team):
         """
@@ -226,7 +265,7 @@ class NbaUtils:
         if total_fta:
             hit_rate += f"罚球{round(total_ft / total_fta * 100, 1)}%"
 
-        if len(games) ==1:
+        if len(games) == 1:
             this_team = games[-1].get('team')
         else:
             this_team = games[-2].get('team')
