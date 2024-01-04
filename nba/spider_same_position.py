@@ -252,12 +252,12 @@ nba_utils = NbaUtils()
 
 
 def same_position():
-    sql = """select player_name, draft_year, team,chinese_name,code  from public.player_draft where draft_position =1 and draft_year >=2000;"""
+    sql = """select player_name, draft_year, team,chinese_name,code  from public.player_draft where draft_position =2 and draft_year >=2003;"""
     players = get_sql(sql)
     datas = []
     for p in players:
         print(p)
-        sql = f"""SELECT id, player_name, season, game_date, up, playing_time, pts, reb, oreb, dreb, ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, plus_minus, team, opp, game_win FROM public.player_regular_gamelog where player_name ='{p.get('player_name')}' and up=True order by  game_date  limit 10 ;
+        sql = f"""SELECT id, player_name, season, game_date, up, playing_time, pts, reb, oreb, dreb, ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, plus_minus, team, opp, game_win FROM public.player_regular_gamelog where player_name ='{p.get('player_name').replace("'", "''")}' and up=True order by  game_date  limit 10 ;
                             """
         first_data = nba_utils.get_game_data(sql)
         first_data['player_name'] = p.get('player_name')
@@ -267,11 +267,11 @@ def same_position():
         first_data['team'] = p.get('team')
         sql = f"""SELECT COUNT(*) as num_games
 FROM public.player_regular_gamelog
-WHERE player_name = '{p.get('player_name')}' 
+WHERE player_name = '{p.get('player_name').replace("'", "''")}' 
   AND up = False 
   AND game_date < (SELECT game_date 
                    FROM public.player_regular_gamelog 
-                   WHERE player_name = '{p.get('player_name')}' 
+                   WHERE player_name = '{p.get('player_name').replace("'", "''")}' 
                      AND up = True 
                    ORDER BY game_date 
                    LIMIT 1)
@@ -279,7 +279,7 @@ WHERE player_name = '{p.get('player_name')}'
         num_games = get_sql(sql)
         first_data['num_games'] = num_games[0].get('num_games')
         datas.append(first_data)
-    sorted_datas = sorted(datas, key=lambda x: x['score'] + x['win'], reverse=True)
+    sorted_datas = sorted(datas, key=lambda x: x['score'], reverse=True)
     today = datetime.now().strftime("%Y-%m-%d")
     tag = 'first_game'
     file_name = f"F:\\notebooks\\其他\\draft\\{today}_first_game.md"
@@ -288,18 +288,22 @@ WHERE player_name = '{p.get('player_name')}'
         for p in sorted_datas:
             i += 1
             file.write(f"#### 第{i}位. **{p.get('chinese_name')}**\n\n")
-            pd_str = ImageUtils().format_draw_data(p.get('code'),p.get('team'), tag, p.get('hit_rate').replace("，", " | "),
-                                                   p.get('data'))
+            ImageUtils().draw_text(p.get('code'), p.get('team'), tag,
+                                   p.get('hit_rate').replace("，", " | "),
+                                   ('┏',
+                                    f"{p.get('data')[0]} 分",
+                                    f"{p.get('data')[1]} 篮板",
+                                    f"{p.get('data')[2]} 助攻",
+                                    f"{p.get('data')[3]} 抢断",
+                                    f"{p.get('data')[4]} 盖帽",
+                                    f"{p.get('data')[5]} 失误",
+                                    '┛'), i)
             file.write(
-                f"![{p.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{p.get('code')}_{tag}.png)\n\n")
-
+                f"![{p.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{p.get('code')}_{tag}_{i}.png)\n\n")
+            pd_str = f"{p.get('data')[0]}分 | {p.get('data')[1]}篮板 | {p.get('data')[2]}助攻 | {p.get('data')[3]}抢断 | {p.get('data')[4]}盖帽 | {p.get('data')[5]}失误"
             print({p.get('player_name')}, p)
-            file.write(f"**{p.get('draft_year')}年状元秀（{nba_teams.get(p.get('team'))}）**\n\n")
-            file.write(f"前十场战绩：{p.get('win')}胜{p.get('loss')}负，")
-            if not p.get('num_games'):
-                file.write("赛季前十场全勤\n\n")
-            else:
-                file.write(f"赛季前十场缺战{p.get('num_games')}场\n\n")
+            file.write(f"**{p.get('draft_year')}年榜眼秀（{nba_teams.get(p.get('team'))}）**\n\n")
+            file.write(f"前十场战绩：{p.get('win')}胜{p.get('loss')}负\n\n")
             file.write(f"场均数据：**{pd_str}**\n\n")
             file.write(f"命中率：{p.get('hit_rate')}\n\n")
 
@@ -310,9 +314,11 @@ def player_list():
     datas = []
     for p in young_guards:
         player_name = \
-            get_sql(f"""select player_name from public.player_active where code = '{p.get('player_name')}'""")[0].get(
+            get_sql(
+                f"""select player_name from public.player_active where code = '{p.get('player_name').replace("'", "''")}'""")[
+                0].get(
                 'player_name')
-        sql = f"""SELECT id, player_name, season, game_date, up, playing_time, pts, reb, oreb, dreb, ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, plus_minus, team, opp, game_win FROM public.player_regular_gamelog where player_name ='{player_name}' and up=True and season=2024 ;
+        sql = f"""SELECT id, player_name, season, game_date, up, playing_time, pts, reb, oreb, dreb, ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, plus_minus, team, opp, game_win FROM public.player_regular_gamelog where player_name ='{player_name.replace("'", "''")}' and up=True and season=2024 ;
                             """
         data = nba_utils.get_game_data(sql)
         data['options'] = p.get('options')
@@ -329,8 +335,16 @@ def player_list():
         for p in sorted_datas:
             i += 1
             file.write(f"#### {i}. {p.get('team')}-{p.get('name')}\n\n")
-            pd_str = ImageUtils().format_draw_data(p.get('code'), tag, p.get('hit_rate').replace("，", " | "),
-                                                   p.get('data'))
+            pd_str = ImageUtils().format_draw_data(p.get('code'), p.get('team'), tag,
+                                                   p.get('hit_rate').replace("，", " | "),
+                                                   ('┏',
+                                                    f"{p.get('data')[0]} 分",
+                                                    f"{p.get('data')[1]} 篮板",
+                                                    f"{p.get('data')[2]} 助攻",
+                                                    f"{p.get('data')[3]} 抢断",
+                                                    f"{p.get('data')[4]} 盖帽",
+                                                    f"{p.get('data')[5]} 失误",
+                                                    '┛'), i)
             file.write(
                 f"![{p.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\dataimg\\{p.get('code')}_{tag}.png)\n\n")
 

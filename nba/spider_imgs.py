@@ -51,7 +51,7 @@ if __name__ == '__main__':
         params = {
             'column_id': '57',
             'page_size': '24',
-            'page_no': f'{num}',
+            'page_no': f'{num+1}',
             'team_ids': '',
             'app_key': 'tiKB2tNdncnZFPOi',
             'os_type': '3',
@@ -70,9 +70,9 @@ if __name__ == '__main__':
         if response.status_code == 200:
             data = response.json().get('data')
             for msg in data:
-
                 print(msg)
                 if len(msg.get('ext').get('players')):
+
                     player_code = msg.get('ext').get('players')[0].get('player_code')
                     if len(msg.get('ext').get('teams')) == 1:
                         team = msg.get('ext').get('teams')[0].get('team_abbr')

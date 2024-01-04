@@ -190,19 +190,27 @@ WHERE
     rnk = 1;
 
 
+-- public.player_active definition
+
+-- Drop table
+
+-- DROP TABLE public.player_active;
+
 CREATE TABLE public.player_active (
 	id bigserial NOT NULL,
 	player_id varchar(8) NOT NULL,
 	code varchar(128) NULL,
 	player_name varchar(64) NOT NULL,
-    chinese_name varchar(128) NULL,
+	chinese_name varchar(128) NULL,
 	draft_year int2 NULL,
-	draft_position int2 Null,
+	draft_position int2 NULL,
 	team varchar(16) NULL,
-    team_en varchar(16) NULL,
+	team_en varchar(16) NULL,
 	height varchar(8) NULL,
 	body_weight varchar(16) NULL,
-	position varchar(16) NULL,
+	"position" varchar(16) NULL,
+	href varchar(128) NULL,
+	birthday date NULL,
 	CONSTRAINT player_player_active_pkey PRIMARY KEY (id)
 );
 

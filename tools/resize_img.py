@@ -1,3 +1,5 @@
+import shutil
+
 from PIL import Image
 import os
 import concurrent.futures
@@ -5,6 +7,7 @@ import concurrent.futures
 # 源文件夹路径和目标文件夹路径
 source_folder = 'F:\\pycharm_workspace\\venus\\nba\\img'
 target_folder = 'F:\\pycharm_workspace\\venus\\nba\\image'
+logo_folder = 'F:\\pycharm_workspace\\venus\\nba\\logo'
 
 
 def split_list(lst, num_parts):
@@ -21,7 +24,13 @@ def split_list(lst, num_parts):
 
 def resize_img():
     # 获取源文件夹中的所有文件
-    files = os.listdir(source_folder)
+    src_files = os.listdir(source_folder)
+    dst_files = os.listdir(target_folder)
+    del_files = [x for x in dst_files if x not in src_files]
+    for item in del_files:
+        os.remove(os.path.join(target_folder, item))
+        print("删除", item)
+    files = [x for x in src_files if x not in dst_files]
     split_files = split_list(files, 10)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # 提交10个任务给线程池
@@ -50,7 +59,7 @@ def resize_img_task(file_list):
             resized_img = img.resize((new_width, new_height))
 
             # 目标文件的完整路径
-            target_path = os.path.join(target_folder, file_name)
+            target_path = os.path.join(target_folder, file_name.replace("'", ""))
 
             # 保存修改后的图片
             resized_img.save(target_path, quality=85)
@@ -72,6 +81,16 @@ def clear_img():
             source_path = os.path.join(source_folder, file_name)
             os.remove(source_path)
             print("清理图片：", file_name)
+
+
+def rename_log_img():
+    src_files = os.listdir(logo_folder)
+    for item in src_files:
+        if '-' in item:
+            print(item)
+            src = os.path.join(logo_folder, item)
+            dst = os.path.join(logo_folder, item.replace("-", "_"))
+            shutil.copy2(src, dst)
 
 
 if __name__ == '__main__':

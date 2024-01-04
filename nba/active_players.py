@@ -33,18 +33,21 @@ def get_all_active_players():
     result = response.json()
     players = []
     for player in result.get("payload", {}).get('players'):
-        players.append((
-            player.get("playerProfile").get("playerId"),
-            player.get("playerProfile").get("code"),
-            player.get("playerProfile").get("displayNameEn"),
-            player.get("playerProfile").get("displayName").replace(" ", "·"),
-            int(player.get("playerProfile").get("draftYear")),
-            player.get("teamProfile").get("name"),
-            player.get("teamProfile").get("nameEn"),
-            player.get("playerProfile").get("height"),
-            player.get("playerProfile").get("weight"),
-            player.get("playerProfile").get("position"),
-        ))
+        result = get_sql(f"select * from public.player_active where player_id ='{player.get('playerProfile').get('playerId')}';")
+        if not len(result):
+            print(player)
+            players.append((
+                player.get("playerProfile").get("playerId"),
+                player.get("playerProfile").get("code"),
+                player.get("playerProfile").get("displayNameEn"),
+                player.get("playerProfile").get("displayName").replace(" ", "·"),
+                int(player.get("playerProfile").get("draftYear")),
+                player.get("teamProfile").get("name"),
+                player.get("teamProfile").get("nameEn"),
+                player.get("playerProfile").get("height"),
+                player.get("playerProfile").get("weight"),
+                player.get("playerProfile").get("position"),
+            ))
 
     sql = f"""INSERT INTO public.player_active (player_id, code, player_name, chinese_name, draft_year,  team, team_en, height, body_weight, "position")
                 VALUES(%s, %s, %s, %s,%s, %s, %s, %s, %s, %s)
@@ -55,70 +58,71 @@ def get_all_active_players():
 
 
 if __name__ == '__main__':
-    sql = """select code,player_name,chinese_name,draft_year,team,draft_position from public.player_active where draft_year<2023 and draft_position >0"""
-    players = get_sql(sql)
-    # get_all_active_players()
-    sorted_players = sorted(players, key=lambda x: x['draft_year'], reverse=True)
-    num_count = {}
-    for player in sorted_players:
-        if player.get("draft_year") not in num_count.keys():
-            num_count[player.get("draft_year")] = [player]
-        else:
-            player_list = num_count.get(player.get("draft_year"))
-            if player.get("draft_position") != 0:
-                player_list.append(player)
-                num_count[player.get("draft_year")] = player_list
-
-    today = datetime.now().strftime("%Y-%m-%d")
-    file_name = f"F:\\notebooks\\其他\\draft\\{today}_num.md"
-    with open(file_name, "w", encoding="utf-8") as file:
-        i = 0
-        for item in num_count.items():
-            active_players = sorted(item[1], key=lambda x: x['draft_position'])
-            i += 1
-            file.write(f"#### {i}. {item[0]}年\n")
-            first_player = active_players[0]
-            last_player = active_players[-1]
-            file.write(
-                f"&emsp;&emsp;目前还有{len(item[1])}名球员在联盟效力，其中选秀顺位最高的是**第{first_player.get('draft_position')}顺位的{first_player.get('chinese_name')}**，选秀顺位最低的是**第{last_player.get('draft_position')}顺位的{last_player.get('chinese_name')}**\n\n")
-            print(item[0], len(item[1]), sorted(item[1], key=lambda x: x['draft_position']))
-            file.write("---\n\n")
-            file.write(f"**第{first_player.get('draft_position')}顺位-{first_player.get('chinese_name')}**\n\n")
-
-            sql = f"""SELECT player_name,team,game_attend, minutes_attend, pts, reb,  ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, salary
-                        FROM public.player_regular_total_season where player_name='{first_player.get('player_name')}' and season='2022-23';
-                    """
-            first_data = get_sql(sql)
-            print(first_data)
-            if not len(first_data):
-                file.write(f"上赛季未出战任何比赛\n\n")
-                continue
-            first_attend = first_data[0].get('game_attend')
-            file.write(f"上赛季效力于{nba_teams.get(first_data[0].get('team'))}，共出战{first_attend}场比赛\n\n")
-            # file.write(f"薪水：{int(first_data[0].get('salary') / 1000)}万")
-            file.write(
-                f"场均贡献：**{round(first_data[0].get('pts') / first_attend, 1)}分 | {round(first_data[0].get('reb') / first_attend, 1)}篮板 | {round(first_data[0].get('ast') / first_attend, 1)}助攻 | {round(first_data[0].get('stl') / first_attend, 1)}抢断 | {round(first_data[0].get('blk') / first_attend, 1)}盖帽**\n\n")
-            file.write(
-                f"命中率：投篮{round(first_data[0].get('fg') / first_data[0].get('fga') * 100, 1)}%，三分球{round(first_data[0].get('fg3') / first_data[0].get('fg3a') * 100, 1)}%，罚球{round(first_data[0].get('ft') / first_data[0].get('fta') * 100, 1)}%\n\n")
-            file.write(
-                f"![{first_player.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\img\\{first_player.get('code')}.png)\n\n")
-
-            file.write("---\n\n")
-            file.write(f"**第{last_player.get('draft_position')}顺位-{last_player.get('chinese_name')}**\n\n")
-            sql = f"""SELECT player_name,team,game_attend, minutes_attend, pts, reb,  ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov,salary
-                                    FROM public.player_regular_total_season where player_name='{last_player.get('player_name')}'and season='2022-23';
-                                """
-            last_data = get_sql(sql)
-            print(last_data)
-            if not len(last_data):
-                file.write(f"上赛季未出战任何比赛\n\n")
-                continue
-            last_attend = first_data[0].get('game_attend')
-            file.write(f"上赛季效力于{nba_teams.get(last_data[0].get('team'))}，共出战{last_attend}场比赛\n\n")
-            # file.write(f"薪水：{int(last_data[0].get('salary') / 1000)}万")
-            file.write(
-                f"场均贡献**{round(last_data[0].get('pts') / last_attend, 1)}分 | {round(last_data[0].get('reb') / last_attend, 1)}篮板 | {round(last_data[0].get('ast') / last_attend, 1)}助攻 | {round(last_data[0].get('stl') / last_attend, 1)}抢断 | {round(last_data[0].get('blk') / last_attend, 1)}盖帽**\n\n")
-            file.write(
-                f"命中率：投篮{round(last_data[0].get('fg') / last_data[0].get('fga') * 100, 1)}%，三分球{round(last_data[0].get('fg3') / last_data[0].get('fg3a') * 100, 1)}%，罚球{round(last_data[0].get('ft') / last_data[0].get('fta') * 100, 1)}%\n\n")
-            file.write(
-                f"![{last_player.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\img\\{last_player.get('code')}.png)\n\n")
+    get_all_active_players()
+    # sql = """select code,player_name,chinese_name,draft_year,team,draft_position from public.player_active where draft_year<2023 and draft_position >0"""
+    # players = get_sql(sql)
+    # # get_all_active_players()
+    # sorted_players = sorted(players, key=lambda x: x['draft_year'], reverse=True)
+    # num_count = {}
+    # for player in sorted_players:
+    #     if player.get("draft_year") not in num_count.keys():
+    #         num_count[player.get("draft_year")] = [player]
+    #     else:
+    #         player_list = num_count.get(player.get("draft_year"))
+    #         if player.get("draft_position") != 0:
+    #             player_list.append(player)
+    #             num_count[player.get("draft_year")] = player_list
+    #
+    # today = datetime.now().strftime("%Y-%m-%d")
+    # file_name = f"F:\\notebooks\\其他\\draft\\{today}_num.md"
+    # with open(file_name, "w", encoding="utf-8") as file:
+    #     i = 0
+    #     for item in num_count.items():
+    #         active_players = sorted(item[1], key=lambda x: x['draft_position'])
+    #         i += 1
+    #         file.write(f"#### {i}. {item[0]}年\n")
+    #         first_player = active_players[0]
+    #         last_player = active_players[-1]
+    #         file.write(
+    #             f"&emsp;&emsp;目前还有{len(item[1])}名球员在联盟效力，其中选秀顺位最高的是**第{first_player.get('draft_position')}顺位的{first_player.get('chinese_name')}**，选秀顺位最低的是**第{last_player.get('draft_position')}顺位的{last_player.get('chinese_name')}**\n\n")
+    #         print(item[0], len(item[1]), sorted(item[1], key=lambda x: x['draft_position']))
+    #         file.write("---\n\n")
+    #         file.write(f"**第{first_player.get('draft_position')}顺位-{first_player.get('chinese_name')}**\n\n")
+    #
+    #         sql = f"""SELECT player_name,team,game_attend, minutes_attend, pts, reb,  ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, salary
+    #                     FROM public.player_regular_total_season where player_name='{first_player.get('player_name')}' and season='2022-23';
+    #                 """
+    #         first_data = get_sql(sql)
+    #         print(first_data)
+    #         if not len(first_data):
+    #             file.write(f"上赛季未出战任何比赛\n\n")
+    #             continue
+    #         first_attend = first_data[0].get('game_attend')
+    #         file.write(f"上赛季效力于{nba_teams.get(first_data[0].get('team'))}，共出战{first_attend}场比赛\n\n")
+    #         # file.write(f"薪水：{int(first_data[0].get('salary') / 1000)}万")
+    #         file.write(
+    #             f"场均贡献：**{round(first_data[0].get('pts') / first_attend, 1)}分 | {round(first_data[0].get('reb') / first_attend, 1)}篮板 | {round(first_data[0].get('ast') / first_attend, 1)}助攻 | {round(first_data[0].get('stl') / first_attend, 1)}抢断 | {round(first_data[0].get('blk') / first_attend, 1)}盖帽**\n\n")
+    #         file.write(
+    #             f"命中率：投篮{round(first_data[0].get('fg') / first_data[0].get('fga') * 100, 1)}%，三分球{round(first_data[0].get('fg3') / first_data[0].get('fg3a') * 100, 1)}%，罚球{round(first_data[0].get('ft') / first_data[0].get('fta') * 100, 1)}%\n\n")
+    #         file.write(
+    #             f"![{first_player.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\img\\{first_player.get('code')}.png)\n\n")
+    #
+    #         file.write("---\n\n")
+    #         file.write(f"**第{last_player.get('draft_position')}顺位-{last_player.get('chinese_name')}**\n\n")
+    #         sql = f"""SELECT player_name,team,game_attend, minutes_attend, pts, reb,  ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov,salary
+    #                                 FROM public.player_regular_total_season where player_name='{last_player.get('player_name')}'and season='2022-23';
+    #                             """
+    #         last_data = get_sql(sql)
+    #         print(last_data)
+    #         if not len(last_data):
+    #             file.write(f"上赛季未出战任何比赛\n\n")
+    #             continue
+    #         last_attend = first_data[0].get('game_attend')
+    #         file.write(f"上赛季效力于{nba_teams.get(last_data[0].get('team'))}，共出战{last_attend}场比赛\n\n")
+    #         # file.write(f"薪水：{int(last_data[0].get('salary') / 1000)}万")
+    #         file.write(
+    #             f"场均贡献**{round(last_data[0].get('pts') / last_attend, 1)}分 | {round(last_data[0].get('reb') / last_attend, 1)}篮板 | {round(last_data[0].get('ast') / last_attend, 1)}助攻 | {round(last_data[0].get('stl') / last_attend, 1)}抢断 | {round(last_data[0].get('blk') / last_attend, 1)}盖帽**\n\n")
+    #         file.write(
+    #             f"命中率：投篮{round(last_data[0].get('fg') / last_data[0].get('fga') * 100, 1)}%，三分球{round(last_data[0].get('fg3') / last_data[0].get('fg3a') * 100, 1)}%，罚球{round(last_data[0].get('ft') / last_data[0].get('fta') * 100, 1)}%\n\n")
+    #         file.write(
+    #             f"![{last_player.get('chinese_name')}](F:\\pycharm_workspace\\venus\\nba\\img\\{last_player.get('code')}.png)\n\n")

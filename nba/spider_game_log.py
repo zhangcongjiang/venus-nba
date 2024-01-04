@@ -136,9 +136,9 @@ def request_statics(response, name, year):
                                  dreb, ast, fga, fg, fg3a, fg3, fta, ft, stl, blk, tov, plus_minus,
                                  team, opp, game_win))
             # print(f"{season}赛季数据获取完毕")
-            # print(
-            #     f"日期:{date_game},选手：{player_name},上场时间：{format_playing_time},母队：{team},对手：{opp},game_id:{game_id},是否上场：{up}")
-            # print(
+            # logger.info(
+            #     f"日期:{date_game},选手：{player_name},上场时间：{format_playing_time},母队：{team},对手：{opp},是否上场：{up}")
+            # logger.info(
             #     f"得分:{pts},篮板：{oreb}-{dreb}-{reb}，助攻：{ast}，投篮：{fg}/{fga}，三分球：{fg3}/{fg3a}，罚球：{ft}/{fta}，抢断：{stl}，盖帽：{blk}，失误：{tov}，正负值：{plus_minus}")
     else:
         print("Table with id='pgl_basic' not found on the page")
@@ -148,6 +148,7 @@ def request_statics(response, name, year):
             VALUES (%s, %s,  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT DO NOTHING;
         """
+        logger.info(regular_data)
         store_to_db(sql, regular_data)
 
     # try:
@@ -276,7 +277,7 @@ def get_user_info(url):
 
 if __name__ == '__main__':
     year = 2024
-
+    logger.info(f"today:{today}")
     where = "id>0"
 
     sql = f"""SELECT id,player_name,href FROM public.player_active where {where} ORDER BY id ASC;"""
